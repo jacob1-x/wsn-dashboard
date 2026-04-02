@@ -1,110 +1,163 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>❄️ WSN Remote Dashboard v2</title>
-
+    <title>WSN Dashboard v3</title>
     <style>
         body {
+            margin: 0;
             background: #0d1117;
-            color: #c9d1d9;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding-top: 60px;
-        }
-        .panel {
-            background: #161b22;
-            padding: 25px;
-            width: 520px;
-            margin: auto;
-            border-radius: 12px;
-            border: 1px solid #30363d;
-        }
-        .info {
-            white-space: pre-line;
-            margin-top: 15px;
-            font-size: 15px;
-            color: #8b949e;
-        }
-        button {
-            background: #238636;
             color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 20px;
-            font-size: 16px;
-            width: 80%;
+            font-family: Arial, sans-serif;
+            display: flex;
         }
-        button:hover {
+
+        /* SIDEBAR */
+        #sidebar {
+            width: 260px;
+            background: #161b22;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            border-right: 2px solid #30363d;
+        }
+
+        #sidebar h2 {
+            margin-top: 0;
+            color: #58a6ff;
+        }
+
+        .menu-section {
+            margin-top: 20px;
+        }
+
+        .dropdown {
+            background: #21262d;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .dropdown:hover {
+            background: #30363d;
+        }
+
+        .dropdown-content {
+            display: none;
+            padding-left: 15px;
+            margin-top: 10px;
+        }
+
+        .dropdown-content button {
+            width: 100%;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: #238636;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .dropdown-content button:hover {
             background: #2ea043;
         }
-        .locked {
-            color: #ff6b6b;
-            font-size: 18px;
-            margin-top: 20px;
+
+        /* MAIN PANEL */
+        #main {
+            flex: 1;
+            padding: 20px;
+        }
+
+        #panel-title {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #58a6ff;
+        }
+
+        #output-box {
+            background: #161b22;
+            border: 2px solid #30363d;
+            padding: 15px;
+            border-radius: 8px;
+            height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        /* STATUS BAR */
+        #status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 260px;
+            right: 0;
+            background: #161b22;
+            padding: 10px;
+            border-top: 2px solid #30363d;
+            color: #8b949e;
         }
     </style>
 </head>
-
 <body>
 
-<div class="panel">
-    <h1>❄️ WSN Remote Dashboard v2</h1>
-    <p class="info" id="session">Loading session…</p>
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+        <h2>WSN Dashboard v3</h2>
 
-    <div id="controls" style="display:none;">
-        <button onclick="sendCommand('ping')">Send Ping</button>
-        <button onclick="sendCommand('status')">Request Status</button>
-        <button onclick="sendCommand('scan')">Trigger FileWatcher Scan</button>
-        <button onclick="sendCommand('restart')">Restart Bot</button>
+        <div class="menu-section">
+            <div class="dropdown" onclick="toggleDropdown('sys')">⚙ System</div>
+            <div id="sys" class="dropdown-content">
+                <button onclick="sendAction('ping')">Ping</button>
+                <button onclick="sendAction('status')">Status</button>
+                <button onclick="sendAction('restart')">Restart</button>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="dropdown" onclick="toggleDropdown('fw')">📁 FileWatcher</div>
+            <div id="fw" class="dropdown-content">
+                <button onclick="sendAction('scan')">Scan Folder</button>
+                <button onclick="sendAction('fw_info')">Info</button>
+                <button onclick="sendAction('fw_refresh')">Refresh</button>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="dropdown" onclick="toggleDropdown('tools')">🧰 Tools</div>
+            <div id="tools" class="dropdown-content">
+                <button onclick="sendAction('logs')">View Logs</button>
+                <button onclick="sendAction('clear')">Clear Output</button>
+                <button onclick="sendAction('theme')">Switch Theme</button>
+            </div>
+        </div>
+
     </div>
 
-    <p id="locked" class="locked" style="display:none;">
-        🚫 Dashboard locked — invalid or missing bot URL.
-    </p>
-</div>
+    <!-- MAIN PANEL -->
+    <div id="main">
+        <div id="panel-title">Dashboard Output</div>
+        <div id="output-box">Waiting for commands...</div>
+    </div>
+
+    <!-- STATUS BAR -->
+    <div id="status-bar">
+        Connected to WSN Node • Dashboard v3
+    </div>
 
 <script>
-    // Read URL parameters
-    const params = new URLSearchParams(window.location.search);
-    const uid = params.get("uid");
-    const ts = params.get("ts");
-    const auth = params.get("auth");
-
-    // REQUIRED AUTH TOKEN
-    const REQUIRED_AUTH = "WSN";
-
-    // Validate URL
-    const valid =
-        uid !== null &&
-        ts !== null &&
-        auth === REQUIRED_AUTH;
-
-    // Display session info
-    if (valid) {
-        document.getElementById("session").innerText =
-            `User ID: ${uid}\nTimestamp: ${ts}\nAuth Token: ${auth}\n\nDashboard unlocked.`;
-        document.getElementById("controls").style.display = "block";
-    } else {
-        document.getElementById("session").innerText =
-            `User ID: ${uid}\nTimestamp: ${ts}\nAuth Token: ${auth}`;
-        document.getElementById("locked").style.display = "block";
+    function toggleDropdown(id) {
+        let box = document.getElementById(id);
+        box.style.display = (box.style.display === "block") ? "none" : "block";
     }
 
-    // Backend: send to Discord webhook
-    function sendCommand(action) {
-        if (!valid) return;
+    function sendAction(action) {
+        document.getElementById("output-box").innerText += "\n> Sent action: " + action;
 
-        fetch("https://discord.com/api/webhooks/1489376756430405643/36UL8Qfn4wJ48r0qvlmqwdkMOgKJgiXHM2p6zbk0yunTf2moAPn4WX_dDAcqebEtJN__", {
+        fetch("YOUR_WEBHOOK_URL_HERE", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
-                content:
-                    `📡 **WSN Dashboard Command**\n` +
-                    `Action: ${action}\n` +
-                    `UID: ${uid}\nTS: ${ts}\nAuth: ${auth}`
+                content: `WSN Dashboard Command\nAction: ${action}\nUID: web\nTS: ${Date.now()}\nAuth: WSN`
             })
         });
     }
@@ -112,3 +165,4 @@
 
 </body>
 </html>
+
