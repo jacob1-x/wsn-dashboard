@@ -20,18 +20,11 @@
             border-radius: 12px;
             border: 1px solid #30363d;
         }
-        button {
-            background: #238636;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 20px;
-            font-size: 16px;
-        }
-        button:hover {
-            background: #2ea043;
+        .info {
+            white-space: pre-line;
+            margin-top: 15px;
+            font-size: 15px;
+            color: #8b949e;
         }
     </style>
 </head>
@@ -40,9 +33,7 @@
 
 <div class="panel">
     <h1>❄️ WSN Remote Dashboard</h1>
-    <p id="status">Loading session…</p>
-
-    <button onclick="sendPing()">Send Dashboard Ping</button>
+    <p class="info" id="session">Loading session…</p>
 </div>
 
 <script>
@@ -53,27 +44,9 @@
     const auth = params.get("auth");
 
     // Display session info
-    document.getElementById("status").innerText =
-        `Connected as UID ${uid}\nTimestamp ${ts}\nAuth ${auth}`;
-
-    // Send command to your backend
-    function sendPing() {
-        fetch("https://your-server-endpoint-here.com/wsn", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                uid: uid,
-                timestamp: ts,
-                auth: auth,
-                action: "dashboard_ping"
-            })
-        })
-        .then(res => res.text())
-        .then(data => alert("Server Response:\n" + data))
-        .catch(err => alert("Error:\n" + err));
-    }
+    document.getElementById("session").innerText =
+        `User ID: ${uid}\nTimestamp: ${ts}\nAuth Token: ${auth}\n\nDashboard is online.`;
 </script>
 
 </body>
 </html>
-
