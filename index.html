@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>❄️ WSN Remote Dashboard</title>
+    <title>❄️ WSN Remote Dashboard v2</title>
 
     <style>
         body {
@@ -15,7 +15,7 @@
         .panel {
             background: #161b22;
             padding: 25px;
-            width: 500px;
+            width: 520px;
             margin: auto;
             border-radius: 12px;
             border: 1px solid #30363d;
@@ -35,9 +35,15 @@
             cursor: pointer;
             margin-top: 20px;
             font-size: 16px;
+            width: 80%;
         }
         button:hover {
             background: #2ea043;
+        }
+        .locked {
+            color: #ff6b6b;
+            font-size: 18px;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -45,10 +51,19 @@
 <body>
 
 <div class="panel">
-    <h1>❄️ WSN Remote Dashboard</h1>
+    <h1>❄️ WSN Remote Dashboard v2</h1>
     <p class="info" id="session">Loading session…</p>
 
-    <button onclick="sendPing()">Send Dashboard Ping</button>
+    <div id="controls" style="display:none;">
+        <button onclick="sendCommand('ping')">Send Ping</button>
+        <button onclick="sendCommand('status')">Request Status</button>
+        <button onclick="sendCommand('scan')">Trigger FileWatcher Scan</button>
+        <button onclick="sendCommand('restart')">Restart Bot</button>
+    </div>
+
+    <p id="locked" class="locked" style="display:none;">
+        🚫 Dashboard locked — invalid or missing bot URL.
+    </p>
 </div>
 
 <script>
@@ -58,21 +73,40 @@
     const ts = params.get("ts");
     const auth = params.get("auth");
 
-    // Display session info
-    document.getElementById("session").innerText =
-        `User ID: ${uid}\nTimestamp: ${ts}\nAuth Token: ${auth}\n\nDashboard is online.`;
+    // REQUIRED AUTH TOKEN
+    const REQUIRED_AUTH = "WSN";
 
-    // Backend: send to Discord webhook (your bot listens for this)
-    function sendPing() {
-        fetch("https://discord.com/api/webhooks/1489376756430405643/36UL8Qfn4wJ48r0qvlmqwdkMOgKJgiXHM2p6zbk0yunTf2moAPn4WX_dDAcqebEtJN__", {
+    // Validate URL
+    const valid =
+        uid !== null &&
+        ts !== null &&
+        auth === REQUIRED_AUTH;
+
+    // Display session info
+    if (valid) {
+        document.getElementById("session").innerText =
+            `User ID: ${uid}\nTimestamp: ${ts}\nAuth Token: ${auth}\n\nDashboard unlocked.`;
+        document.getElementById("controls").style.display = "block";
+    } else {
+        document.getElementById("session").innerText =
+            `User ID: ${uid}\nTimestamp: ${ts}\nAuth Token: ${auth}`;
+        document.getElementById("locked").style.display = "block";
+    }
+
+    // Backend: send to Discord webhook
+    function sendCommand(action) {
+        if (!valid) return;
+
+        fetch("YOUR_WEBHOOK_URL_HERE", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                content: `📡 **WSN Dashboard Ping**\nUID: ${uid}\nTS: ${ts}\nAuth: ${auth}`
+                content:
+                    `📡 **WSN Dashboard Command**\n` +
+                    `Action: ${action}\n` +
+                    `UID: ${uid}\nTS: ${ts}\nAuth: ${auth}`
             })
-        })
-        .then(() => alert("Ping sent to bot."))
-        .catch(err => alert("Error: " + err));
+        });
     }
 </script>
 
