@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>WSN Remote Dashboard</title>
+    <title>❄️ WSN Remote Dashboard</title>
 
     <style>
         body {
@@ -26,6 +26,19 @@
             font-size: 15px;
             color: #8b949e;
         }
+        button {
+            background: #238636;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #2ea043;
+        }
     </style>
 </head>
 
@@ -34,6 +47,8 @@
 <div class="panel">
     <h1>❄️ WSN Remote Dashboard</h1>
     <p class="info" id="session">Loading session…</p>
+
+    <button onclick="sendPing()">Send Dashboard Ping</button>
 </div>
 
 <script>
@@ -46,6 +61,19 @@
     // Display session info
     document.getElementById("session").innerText =
         `User ID: ${uid}\nTimestamp: ${ts}\nAuth Token: ${auth}\n\nDashboard is online.`;
+
+    // Backend: send to Discord webhook (your bot listens for this)
+    function sendPing() {
+        fetch("https://discord.com/api/webhooks/1489376756430405643/36UL8Qfn4wJ48r0qvlmqwdkMOgKJgiXHM2p6zbk0yunTf2moAPn4WX_dDAcqebEtJN__", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                content: `📡 **WSN Dashboard Ping**\nUID: ${uid}\nTS: ${ts}\nAuth: ${auth}`
+            })
+        })
+        .then(() => alert("Ping sent to bot."))
+        .catch(err => alert("Error: " + err));
+    }
 </script>
 
 </body>
