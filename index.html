@@ -1,29 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WSN Dashboard v3</title>
+    <meta charset="UTF-8">
+    <title>WSN Dashboard v4</title>
     <style>
+        :root {
+            --bg-main: #0d1117;
+            --bg-panel: #161b22;
+            --bg-panel-alt: #21262d;
+            --border: #30363d;
+            --accent: #58a6ff;
+            --accent-soft: #238636;
+            --accent-soft-hover: #2ea043;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --danger: #ff5555;
+            --warning: #f0883e;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
-            background: #0d1117;
-            color: white;
+            background: var(--bg-main);
+            color: var(--text-main);
             font-family: Arial, sans-serif;
             display: flex;
+            height: 100vh;
+            overflow: hidden;
         }
 
         /* SIDEBAR */
         #sidebar {
             width: 260px;
-            background: #161b22;
+            background: var(--bg-panel);
             height: 100vh;
             padding: 20px;
-            box-sizing: border-box;
-            border-right: 2px solid #30363d;
+            border-right: 2px solid var(--border);
+            display: flex;
+            flex-direction: column;
         }
 
         #sidebar h2 {
-            margin-top: 0;
-            color: #58a6ff;
+            margin: 0 0 4px 0;
+            color: var(--accent);
+        }
+
+        #sidebar small {
+            color: var(--text-muted);
         }
 
         .menu-section {
@@ -31,70 +57,194 @@
         }
 
         .dropdown {
-            background: #21262d;
+            background: var(--bg-panel-alt);
             padding: 10px;
             border-radius: 6px;
             cursor: pointer;
             margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
         }
 
         .dropdown:hover {
             background: #30363d;
         }
 
+        .dropdown span {
+            font-size: 14px;
+        }
+
+        .dropdown .chevron {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
         .dropdown-content {
             display: none;
-            padding-left: 15px;
-            margin-top: 10px;
+            padding-left: 5px;
+            margin-top: 8px;
         }
 
         .dropdown-content button {
             width: 100%;
             margin-bottom: 8px;
             padding: 8px;
-            background: #238636;
+            background: var(--accent-soft);
             border: none;
             border-radius: 4px;
             color: white;
             cursor: pointer;
+            font-size: 13px;
+            text-align: left;
         }
 
         .dropdown-content button:hover {
-            background: #2ea043;
+            background: var(--accent-soft-hover);
+        }
+
+        .dropdown-content button.danger {
+            background: #b32626;
+        }
+
+        .dropdown-content button.danger:hover {
+            background: #d12f2f;
         }
 
         /* MAIN PANEL */
         #main {
             flex: 1;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
         }
 
         #panel-title {
-            font-size: 28px;
-            margin-bottom: 10px;
-            color: #58a6ff;
+            font-size: 24px;
+            margin: 0;
+            color: var(--accent);
+        }
+
+        #node-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        #node-meta div {
+            margin-bottom: 2px;
         }
 
         #output-box {
-            background: #161b22;
-            border: 2px solid #30363d;
-            padding: 15px;
+            background: var(--bg-panel);
+            border: 2px solid var(--border);
+            padding: 12px;
             border-radius: 8px;
-            height: 300px;
+            flex: 1;
             overflow-y: auto;
             white-space: pre-wrap;
+            font-family: Consolas, monospace;
+            font-size: 13px;
         }
 
-        /* STATUS BAR */
+        .log-line {
+            margin-bottom: 4px;
+        }
+
+        .log-time {
+            color: var(--text-muted);
+        }
+
+        .log-tag {
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-right: 4px;
+        }
+
+        .tag-sent {
+            background: rgba(88, 166, 255, 0.15);
+            color: var(--accent);
+        }
+
+        .tag-info {
+            background: rgba(34, 221, 136, 0.15);
+            color: #3fbf8a;
+        }
+
+        .tag-warn {
+            background: rgba(240, 136, 62, 0.15);
+            color: var(--warning);
+        }
+
+        .tag-error {
+            background: rgba(255, 85, 85, 0.15);
+            color: var(--danger);
+        }
+
+        #controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        #uid-input {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 4px 6px;
+            color: var(--text-main);
+            font-size: 12px;
+            width: 120px;
+        }
+
         #status-bar {
-            position: fixed;
-            bottom: 0;
-            left: 260px;
-            right: 0;
-            background: #161b22;
-            padding: 10px;
-            border-top: 2px solid #30363d;
-            color: #8b949e;
+            background: var(--bg-panel);
+            padding: 8px 12px;
+            border-top: 2px solid var(--border);
+            color: var(--text-muted);
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #status-left span {
+            margin-right: 10px;
+        }
+
+        #status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #2ea043;
+            margin-right: 4px;
+        }
+
+        #clear-local {
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-muted);
+            padding: 4px 8px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        #clear-local:hover {
+            border-color: var(--accent);
+            color: var(--accent);
         }
     </style>
 </head>
@@ -102,67 +252,171 @@
 
     <!-- SIDEBAR -->
     <div id="sidebar">
-        <h2>WSN Dashboard v3</h2>
+        <div>
+            <h2>WSN Dashboard v4</h2>
+            <small>Linked to WSN Node • CryoPlate v7</small>
+        </div>
 
         <div class="menu-section">
-            <div class="dropdown" onclick="toggleDropdown('sys')">⚙ System</div>
-            <div id="sys" class="dropdown-content">
+            <div class="dropdown" onclick="toggleDropdown('sys')">
+                <span>⚙ System</span>
+                <span class="chevron" id="chevron-sys">▼</span>
+            </div>
+            <div id="sys" class="dropdown-content" style="display: block;">
                 <button onclick="sendAction('ping')">Ping</button>
                 <button onclick="sendAction('status')">Status</button>
-                <button onclick="sendAction('restart')">Restart</button>
+                <button onclick="sendAction('restart')" class="danger">Restart</button>
             </div>
         </div>
 
         <div class="menu-section">
-            <div class="dropdown" onclick="toggleDropdown('fw')">📁 FileWatcher</div>
-            <div id="fw" class="dropdown-content">
+            <div class="dropdown" onclick="toggleDropdown('fw')">
+                <span>📁 FileWatcher</span>
+                <span class="chevron" id="chevron-fw">▼</span>
+            </div>
+            <div id="fw" class="dropdown-content" style="display: block;">
                 <button onclick="sendAction('scan')">Scan Folder</button>
                 <button onclick="sendAction('fw_info')">Info</button>
-                <button onclick="sendAction('fw_refresh')">Refresh</button>
+                <button onclick="sendAction('fw_refresh')">Build &amp; Publish ZIP</button>
             </div>
         </div>
 
         <div class="menu-section">
-            <div class="dropdown" onclick="toggleDropdown('tools')">🧰 Tools</div>
-            <div id="tools" class="dropdown-content">
+            <div class="dropdown" onclick="toggleDropdown('tools')">
+                <span>🧰 Tools</span>
+                <span class="chevron" id="chevron-tools">▼</span>
+            </div>
+            <div id="tools" class="dropdown-content" style="display: block;">
                 <button onclick="sendAction('logs')">View Logs</button>
-                <button onclick="sendAction('clear')">Clear Output</button>
+                <button onclick="sendAction('clear')">Clear Output (Node)</button>
                 <button onclick="sendAction('theme')">Switch Theme</button>
             </div>
         </div>
-
     </div>
 
     <!-- MAIN PANEL -->
     <div id="main">
-        <div id="panel-title">Dashboard Output</div>
-        <div id="output-box">Waiting for commands...</div>
-    </div>
+        <div id="panel-header">
+            <h1 id="panel-title">Dashboard Output</h1>
+            <div id="node-meta">
+                <div id="meta-node">Node: WSN-NODE-LOCAL</div>
+                <div id="meta-last-action">Last action: none</div>
+                <div id="meta-last-ts">Last TS: —</div>
+            </div>
+        </div>
 
-    <!-- STATUS BAR -->
-    <div id="status-bar">
-        Connected to WSN Node • Dashboard v3
+        <div id="controls-row">
+            <div>
+                <span>UID:</span>
+                <input id="uid-input" type="text" value="web" />
+                <span style="margin-left:8px;">Auth: <code>WSN</code></span>
+            </div>
+            <div>
+                <span>FileWatcher v7 • ZIP packaging enabled</span>
+            </div>
+        </div>
+
+        <div id="output-box"></div>
+
+        <div id="status-bar">
+            <div id="status-left">
+                <span><span id="status-dot"></span><span id="status-text">Connected to WSN Node</span></span>
+                <span id="status-extra">Ready.</span>
+            </div>
+            <div id="status-right">
+                <button id="clear-local" onclick="clearLocalOutput()">Clear local log</button>
+            </div>
+        </div>
     </div>
 
 <script>
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1489376756430405643/36UL8Qfn4wJ48r0qvlmqwdkMOgKJgiXHM2p6zbk0yunTf2moAPn4WX_dDAcqebEtJN__";
+    const outputBox = document.getElementById("output-box");
+    const statusText = document.getElementById("status-text");
+    const statusExtra = document.getElementById("status-extra");
+    const metaLastAction = document.getElementById("meta-last-action");
+    const metaLastTs = document.getElementById("meta-last-ts");
+
+    function nowTime() {
+        const d = new Date();
+        return d.toLocaleTimeString();
+    }
+
+    function appendLog(tag, text, level = "info") {
+        const line = document.createElement("div");
+        line.className = "log-line";
+
+        const timeSpan = document.createElement("span");
+        timeSpan.className = "log-time";
+        timeSpan.textContent = "[" + nowTime() + "] ";
+
+        const tagSpan = document.createElement("span");
+        tagSpan.className = "log-tag " + (
+            level === "error" ? "tag-error" :
+            level === "warn" ? "tag-warn" :
+            level === "sent" ? "tag-sent" :
+            "tag-info"
+        );
+        tagSpan.textContent = tag;
+
+        const textSpan = document.createElement("span");
+        textSpan.textContent = " " + text;
+
+        line.appendChild(timeSpan);
+        line.appendChild(tagSpan);
+        line.appendChild(textSpan);
+
+        outputBox.appendChild(line);
+        outputBox.scrollTop = outputBox.scrollHeight;
+    }
+
     function toggleDropdown(id) {
-        let box = document.getElementById(id);
-        box.style.display = (box.style.display === "block") ? "none" : "block";
+        const box = document.getElementById(id);
+        const chev = document.getElementById("chevron-" + id);
+        const isOpen = box.style.display === "block";
+        box.style.display = isOpen ? "none" : "block";
+        if (chev) chev.textContent = isOpen ? "►" : "▼";
     }
 
     function sendAction(action) {
-        document.getElementById("output-box").innerText += "\n> Sent action: " + action;
+        const uid = document.getElementById("uid-input").value || "web";
+        const ts = Date.now();
 
-        fetch("https://discord.com/api/webhooks/1489376756430405643/36UL8Qfn4wJ48r0qvlmqwdkMOgKJgiXHM2p6zbk0yunTf2moAPn4WX_dDAcqebEtJN__", {
+        appendLog("SENT", `Action: ${action} • UID: ${uid} • TS: ${ts}`, "sent");
+
+        metaLastAction.textContent = "Last action: " + action;
+        metaLastTs.textContent = "Last TS: " + ts;
+        statusExtra.textContent = "Last command sent: " + action;
+
+        fetch(WEBHOOK_URL, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
-                content: `WSN Dashboard Command\nAction: ${action}\nUID: web\nTS: ${Date.now()}\nAuth: WSN`
+                content: `WSN Dashboard Command\nAction: ${action}\nUID: ${uid}\nTS: ${ts}\nAuth: WSN`
             })
+        }).then(res => {
+            if (!res.ok) {
+                appendLog("ERR", "Webhook HTTP " + res.status, "error");
+                statusExtra.textContent = "Webhook error: " + res.status;
+            } else {
+                appendLog("INFO", "Command delivered to WSN node.");
+            }
+        }).catch(err => {
+            appendLog("ERR", "Network error: " + err, "error");
+            statusExtra.textContent = "Network error.";
         });
     }
+
+    function clearLocalOutput() {
+        outputBox.innerHTML = "";
+        appendLog("INFO", "Local dashboard log cleared.");
+        statusExtra.textContent = "Local log cleared.";
+    }
+
+    // Initial line
+    appendLog("INFO", "WSN Dashboard v4 ready. Use the sidebar to send commands.");
+    appendLog("INFO", "FileWatcher v7: fw_refresh will build and publish a WSN-PACK archive.");
 </script>
 
 </body>
 </html>
-
